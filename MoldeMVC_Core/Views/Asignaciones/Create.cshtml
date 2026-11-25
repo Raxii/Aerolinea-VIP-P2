@@ -1,0 +1,20 @@
+@model MoldeMVC_Core.Models.Asignacion
+@{ ViewData["Title"] = "Nuevo Asignaciones"; }
+<div class="container py-4"><div class="mb-3"><h1 class="h3 mb-1">Nuevo Asignaciones</h1><p class="text-muted mb-0">Complete los campos y guarde los cambios.</p></div>
+<div class="card border-0 shadow-sm"><div class="card-body p-4"><form asp-action="Create" method="post">
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+<div class="row g-3"><div class="col-md-6"><label asp-for="IdSql" class="form-label">ID SQL</label><input asp-for="IdSql" type="number" class="form-control" /><span asp-validation-for="IdSql" class="text-danger"></span></div>
+<div class="col-md-6"><label class="form-label">Reserva ObjectId</label><input name="reservaId" value="@ViewBag.ReservaId" class="form-control" placeholder="ObjectId de MongoDB (24 caracteres)" /><div class="form-text">Use el ObjectId del documento relacionado.</div><span class="text-danger">@Html.ValidationMessage("reservaId")</span></div>
+<div class="col-md-6"><label class="form-label">Pasajero ObjectId</label><input name="pasajeroId" value="@ViewBag.PasajeroId" class="form-control" placeholder="ObjectId de MongoDB (24 caracteres)" /><div class="form-text">Use el ObjectId del documento relacionado.</div><span class="text-danger">@Html.ValidationMessage("pasajeroId")</span></div>
+<div class="col-md-6"><label class="form-label">Vuelo ObjectId</label><input name="vueloId" value="@ViewBag.VueloId" class="form-control" placeholder="ObjectId de MongoDB (24 caracteres)" /><div class="form-text">Use el ObjectId del documento relacionado.</div><span class="text-danger">@Html.ValidationMessage("vueloId")</span></div>
+<div class="col-md-6"><label asp-for="NumeroAsiento" class="form-label">Número de asiento</label><input asp-for="NumeroAsiento" type="number" class="form-control" /><span asp-validation-for="NumeroAsiento" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="ImporteTramo" class="form-label">Importe del tramo</label><input asp-for="ImporteTramo" type="number" step="any" class="form-control" /><span asp-validation-for="ImporteTramo" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Estado" class="form-label">Estado</label><input asp-for="Estado" class="form-control" /><span asp-validation-for="Estado" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="FechaAsignacion" class="form-label">Fecha de asignación</label><input asp-for="FechaAsignacion" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control" /><span asp-validation-for="FechaAsignacion" class="text-danger"></span></div>
+<div class="col-md-6"><div class="form-check mt-4"><input type="checkbox" name="incluirCheckIn" value="true" class="form-check-input" checked="@(Model.CheckIn != null && Model.CheckIn.IdSql > 0)" /><label class="form-check-label">Incluir información de check-in</label></div></div>
+<div class="col-md-6"><label asp-for="CheckIn.IdSql" class="form-label">Check-in - ID SQL</label><input asp-for="CheckIn.IdSql" type="number" class="form-control" /><span asp-validation-for="CheckIn.IdSql" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="CheckIn.FechaRegistro" class="form-label">Check-in - fecha registro</label><input asp-for="CheckIn.FechaRegistro" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control" /><span asp-validation-for="CheckIn.FechaRegistro" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="CheckIn.Estado" class="form-label">Check-in - estado</label><input asp-for="CheckIn.Estado" class="form-control" /><span asp-validation-for="CheckIn.Estado" class="text-danger"></span></div></div>
+<div class="d-flex gap-2 mt-4"><button type="submit" class="btn btn-primary">Guardar</button><a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a></div>
+</form></div></div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

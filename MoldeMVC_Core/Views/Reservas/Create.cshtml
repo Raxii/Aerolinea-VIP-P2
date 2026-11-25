@@ -1,0 +1,14 @@
+@model MoldeMVC_Core.Models.Reserva
+@{ ViewData["Title"] = "Nuevo Reservas"; }
+<div class="container py-4"><div class="mb-3"><h1 class="h3 mb-1">Nuevo Reservas</h1><p class="text-muted mb-0">Complete los campos y guarde los cambios.</p></div>
+<div class="card border-0 shadow-sm"><div class="card-body p-4"><form asp-action="Create" method="post">
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+<div class="row g-3"><div class="col-md-6"><label asp-for="IdSql" class="form-label">ID SQL</label><input asp-for="IdSql" type="number" class="form-control" /><span asp-validation-for="IdSql" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="CodigoReserva" class="form-label">Código de reserva</label><input asp-for="CodigoReserva" type="text" class="form-control" /><span asp-validation-for="CodigoReserva" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="UsuarioId" class="form-label">Usuario ID (Identity)</label><input asp-for="UsuarioId" class="form-control" /><span asp-validation-for="UsuarioId" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="FechaCreacion" class="form-label">Fecha de creación</label><input asp-for="FechaCreacion" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control" /><span asp-validation-for="FechaCreacion" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="FechaExpiracion" class="form-label">Fecha de expiración</label><input asp-for="FechaExpiracion" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control" /><span asp-validation-for="FechaExpiracion" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Estado" class="form-label">Estado</label><input asp-for="Estado" class="form-control" /><span asp-validation-for="Estado" class="text-danger"></span></div></div>
+<div class="d-flex gap-2 mt-4"><button type="submit" class="btn btn-primary">Guardar</button><a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a></div>
+</form></div></div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

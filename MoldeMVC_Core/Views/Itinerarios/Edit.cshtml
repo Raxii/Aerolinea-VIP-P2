@@ -1,0 +1,13 @@
+@model MoldeMVC_Core.Models.Itinerario
+@{ ViewData["Title"] = "Editar Itinerarios"; }
+<div class="container py-4"><div class="mb-3"><h1 class="h3 mb-1">Editar Itinerarios</h1><p class="text-muted mb-0">Complete los campos y guarde los cambios.</p></div>
+<div class="card border-0 shadow-sm"><div class="card-body p-4"><form asp-action="Edit" method="post"><input type="hidden" name="id" value="@Model.Id.ToString()" />
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+<div class="row g-3"><div class="col-md-6"><label asp-for="IdSql" class="form-label">ID SQL</label><input asp-for="IdSql" type="number" class="form-control" /><span asp-validation-for="IdSql" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Referencia" class="form-label">Referencia</label><input asp-for="Referencia" class="form-control" /><span asp-validation-for="Referencia" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Nombre" class="form-label">Nombre</label><input asp-for="Nombre" class="form-control" /><span asp-validation-for="Nombre" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Estado" class="form-label">Estado</label><input asp-for="Estado" class="form-control" /><span asp-validation-for="Estado" class="text-danger"></span></div>
+<div class="col-12"><label class="form-label fw-semibold">Tramos (JSON)</label><textarea name="tramosJson" class="form-control font-monospace" rows="8">@ViewBag.TramosJson</textarea><div class="form-text">Ingrese un arreglo JSON. Si no necesita elementos, deje <code>[]</code>.</div><span class="text-danger">@Html.ValidationMessage("tramosJson")</span></div></div>
+<div class="d-flex gap-2 mt-4"><button type="submit" class="btn btn-primary">Guardar</button><a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a></div>
+</form></div></div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

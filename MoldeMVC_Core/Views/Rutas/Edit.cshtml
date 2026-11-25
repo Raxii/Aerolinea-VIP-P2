@@ -1,0 +1,20 @@
+@model MoldeMVC_Core.Models.Ruta
+@{ ViewData["Title"] = "Editar Rutas"; }
+<div class="container py-4"><div class="mb-3"><h1 class="h3 mb-1">Editar Rutas</h1><p class="text-muted mb-0">Complete los campos y guarde los cambios.</p></div>
+<div class="card border-0 shadow-sm"><div class="card-body p-4"><form asp-action="Edit" method="post"><input type="hidden" name="id" value="@Model.Id.ToString()" />
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+<div class="row g-3"><div class="col-md-6"><label asp-for="IdSql" class="form-label">ID SQL</label><input asp-for="IdSql" type="number" class="form-control" /><span asp-validation-for="IdSql" class="text-danger"></span></div>
+<div class="col-md-6"><label class="form-label">ObjectId aeropuerto origen</label><input name="origenAeropuertoId" value="@ViewBag.OrigenId" class="form-control" placeholder="ObjectId de MongoDB (24 caracteres)" /><div class="form-text">Use el ObjectId del documento relacionado.</div><span class="text-danger">@Html.ValidationMessage("origenAeropuertoId")</span></div>
+<div class="col-md-6"><label asp-for="Origen.CodigoIATA" class="form-label">Origen - código IATA</label><input asp-for="Origen.CodigoIATA" class="form-control" /><span asp-validation-for="Origen.CodigoIATA" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Origen.Nombre" class="form-label">Origen - nombre</label><input asp-for="Origen.Nombre" class="form-control" /><span asp-validation-for="Origen.Nombre" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Origen.Localidad" class="form-label">Origen - localidad</label><input asp-for="Origen.Localidad" class="form-control" /><span asp-validation-for="Origen.Localidad" class="text-danger"></span></div>
+<div class="col-md-6"><label class="form-label">ObjectId aeropuerto destino</label><input name="destinoAeropuertoId" value="@ViewBag.DestinoId" class="form-control" placeholder="ObjectId de MongoDB (24 caracteres)" /><div class="form-text">Use el ObjectId del documento relacionado.</div><span class="text-danger">@Html.ValidationMessage("destinoAeropuertoId")</span></div>
+<div class="col-md-6"><label asp-for="Destino.CodigoIATA" class="form-label">Destino - código IATA</label><input asp-for="Destino.CodigoIATA" class="form-control" /><span asp-validation-for="Destino.CodigoIATA" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Destino.Nombre" class="form-label">Destino - nombre</label><input asp-for="Destino.Nombre" class="form-control" /><span asp-validation-for="Destino.Nombre" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Destino.Localidad" class="form-label">Destino - localidad</label><input asp-for="Destino.Localidad" class="form-control" /><span asp-validation-for="Destino.Localidad" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="TarifaReferencial" class="form-label">Tarifa referencial</label><input asp-for="TarifaReferencial" type="number" step="any" class="form-control" /><span asp-validation-for="TarifaReferencial" class="text-danger"></span></div>
+<div class="col-md-6"><div class="form-check mt-4"><input asp-for="Activa" class="form-check-input" /><label asp-for="Activa" class="form-check-label">Activa</label></div></div>
+<div class="col-12"><label class="form-label fw-semibold">Frecuencias (JSON)</label><textarea name="frecuenciasJson" class="form-control font-monospace" rows="8">@ViewBag.FrecuenciasJson</textarea><div class="form-text">Ingrese un arreglo JSON. Si no necesita elementos, deje <code>[]</code>.</div><span class="text-danger">@Html.ValidationMessage("frecuenciasJson")</span></div></div>
+<div class="d-flex gap-2 mt-4"><button type="submit" class="btn btn-primary">Guardar</button><a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a></div>
+</form></div></div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "Error";
+}
+
+<h1 class="text-danger">Error.</h1>
+<h2 class="text-danger">Ocurrió un error al procesar la solicitud.</h2>
+
+@if (ViewBag.RequestId != null)
+{
+    <p>
+        <strong>Identificador de solicitud:</strong>
+        <code>@ViewBag.RequestId</code>
+    </p>
+}

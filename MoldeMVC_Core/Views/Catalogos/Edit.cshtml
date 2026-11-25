@@ -1,0 +1,19 @@
+@model MoldeMVC_Core.Models.Catalogo
+@{ ViewData["Title"] = "Editar Catálogos"; }
+<div class="container py-4"><div class="mb-3"><h1 class="h3 mb-1">Editar Catálogos</h1><p class="text-muted mb-0">Complete los campos y guarde los cambios.</p></div>
+<div class="card border-0 shadow-sm"><div class="card-body p-4"><form asp-action="Edit" method="post"><input type="hidden" name="id" value="@Model.Id.ToString()" />
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+<div class="row g-3"><div class="col-md-6"><label asp-for="Tipo" class="form-label">Tipo</label><input asp-for="Tipo" class="form-control" /><span asp-validation-for="Tipo" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Codigo" class="form-label">Código</label><input asp-for="Codigo" class="form-control" /><span asp-validation-for="Codigo" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Descripcion" class="form-label">Descripción</label><input asp-for="Descripcion" class="form-control" /><span asp-validation-for="Descripcion" class="text-danger"></span></div>
+<div class="col-md-6"><label class="form-label">Ocupa inventario</label><select asp-for="OcupaInventario" class="form-select"><option value="">Sin especificar</option><option value="true">Sí</option><option value="false">No</option></select></div>
+<div class="col-md-6"><label asp-for="EstadoVisual" class="form-label">Estado visual</label><input asp-for="EstadoVisual" type="text" class="form-control" /><span asp-validation-for="EstadoVisual" class="text-danger"></span></div>
+<div class="col-md-6"><label class="form-label">Activo</label><select asp-for="Activo" class="form-select"><option value="">Sin especificar</option><option value="true">Sí</option><option value="false">No</option></select></div>
+<div class="col-md-6"><label class="form-label">Activa</label><select asp-for="Activa" class="form-select"><option value="">Sin especificar</option><option value="true">Sí</option><option value="false">No</option></select></div>
+<div class="col-md-6"><label asp-for="LongitudNumero" class="form-label">Longitud número</label><input asp-for="LongitudNumero" type="number" step="any" class="form-control" /><span asp-validation-for="LongitudNumero" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="LongitudCodigoSeguridad" class="form-label">Longitud código de seguridad</label><input asp-for="LongitudCodigoSeguridad" type="number" step="any" class="form-control" /><span asp-validation-for="LongitudCodigoSeguridad" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="PrefijosReferencia" class="form-label">Prefijos de referencia</label><input asp-for="PrefijosReferencia" type="text" class="form-control" /><span asp-validation-for="PrefijosReferencia" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="RutaLogo" class="form-label">Ruta del logo</label><input asp-for="RutaLogo" type="text" class="form-control" /><span asp-validation-for="RutaLogo" class="text-danger"></span></div></div>
+<div class="d-flex gap-2 mt-4"><button type="submit" class="btn btn-primary">Guardar</button><a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a></div>
+</form></div></div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

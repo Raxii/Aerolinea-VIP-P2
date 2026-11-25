@@ -1,0 +1,17 @@
+@model MoldeMVC_Core.Models.Compra
+@{ ViewData["Title"] = "Nuevo Compras"; }
+<div class="container py-4"><div class="mb-3"><h1 class="h3 mb-1">Nuevo Compras</h1><p class="text-muted mb-0">Complete los campos y guarde los cambios.</p></div>
+<div class="card border-0 shadow-sm"><div class="card-body p-4"><form asp-action="Create" method="post">
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+<div class="row g-3"><div class="col-md-6"><label asp-for="IdSql" class="form-label">ID SQL</label><input asp-for="IdSql" type="number" class="form-control" /><span asp-validation-for="IdSql" class="text-danger"></span></div>
+<div class="col-md-6"><label class="form-label">Reserva ObjectId</label><input name="reservaId" value="@ViewBag.ReservaId" class="form-control" placeholder="ObjectId de MongoDB (24 caracteres)" /><div class="form-text">Use el ObjectId del documento relacionado.</div><span class="text-danger">@Html.ValidationMessage("reservaId")</span></div>
+<div class="col-md-6"><label asp-for="FechaCompra" class="form-label">Fecha de compra</label><input asp-for="FechaCompra" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control" /><span asp-validation-for="FechaCompra" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Importe" class="form-label">Importe</label><input asp-for="Importe" type="number" step="any" class="form-control" /><span asp-validation-for="Importe" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Moneda" class="form-label">Moneda</label><input asp-for="Moneda" class="form-control" /><span asp-validation-for="Moneda" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Estado" class="form-label">Estado</label><input asp-for="Estado" class="form-control" /><span asp-validation-for="Estado" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="ClaveIdempotencia" class="form-label">Clave de idempotencia</label><input asp-for="ClaveIdempotencia" class="form-control" /><span asp-validation-for="ClaveIdempotencia" class="text-danger"></span></div>
+<div class="col-12"><label class="form-label fw-semibold">Pagos (JSON)</label><textarea name="pagosJson" class="form-control font-monospace" rows="8">@ViewBag.PagosJson</textarea><div class="form-text">Ingrese un arreglo JSON. Si no necesita elementos, deje <code>[]</code>.</div><span class="text-danger">@Html.ValidationMessage("pagosJson")</span></div>
+<div class="col-12"><label class="form-label fw-semibold">Comprobantes (JSON)</label><textarea name="comprobantesJson" class="form-control font-monospace" rows="8">@ViewBag.ComprobantesJson</textarea><div class="form-text">Ingrese un arreglo JSON. Si no necesita elementos, deje <code>[]</code>.</div><span class="text-danger">@Html.ValidationMessage("comprobantesJson")</span></div></div>
+<div class="d-flex gap-2 mt-4"><button type="submit" class="btn btn-primary">Guardar</button><a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a></div>
+</form></div></div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -1,0 +1,37 @@
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<div class="py-4">
+    <div class="p-4 p-md-5 mb-4 bg-dark text-white rounded-3">
+        <h1 class="display-6 fw-bold">Aerolínea VIP</h1>
+        <p class="lead mb-0">
+            Sistema de gestión de vuelos, rutas, aeronaves, pasajeros y reservas.
+        </p>
+    </div>
+
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <h2 class="h4 mb-3">Módulos del sistema</h2>
+        <div class="row g-3">
+            <div class="col-md-4"><a asp-controller="Vuelos" asp-action="Index" class="text-decoration-none"><div class="card h-100 shadow-sm"><div class="card-body"><h3 class="h5">Vuelos</h3><p class="text-muted mb-0">Consulta de vuelos registrados.</p></div></div></a></div>
+            <div class="col-md-4"><a asp-controller="Rutas" asp-action="Index" class="text-decoration-none"><div class="card h-100 shadow-sm"><div class="card-body"><h3 class="h5">Rutas</h3><p class="text-muted mb-0">Origen, destino y frecuencias.</p></div></div></a></div>
+            <div class="col-md-4"><a asp-controller="Aeropuertos" asp-action="Index" class="text-decoration-none"><div class="card h-100 shadow-sm"><div class="card-body"><h3 class="h5">Aeropuertos</h3><p class="text-muted mb-0">Catálogo de aeropuertos.</p></div></div></a></div>
+            <div class="col-md-4"><a asp-controller="Aeronaves" asp-action="Index" class="text-decoration-none"><div class="card h-100 shadow-sm"><div class="card-body"><h3 class="h5">Aeronaves</h3><p class="text-muted mb-0">Flota y asientos.</p></div></div></a></div>
+            <div class="col-md-4"><a asp-controller="Pasajeros" asp-action="Index" class="text-decoration-none"><div class="card h-100 shadow-sm"><div class="card-body"><h3 class="h5">Pasajeros</h3><p class="text-muted mb-0">Información de pasajeros.</p></div></div></a></div>
+            <div class="col-md-4"><a asp-controller="Itinerarios" asp-action="Index" class="text-decoration-none"><div class="card h-100 shadow-sm"><div class="card-body"><h3 class="h5">Itinerarios</h3><p class="text-muted mb-0">Tramos y vuelos relacionados.</p></div></div></a></div>
+            <div class="col-md-4"><a asp-controller="Reservas" asp-action="Index" class="text-decoration-none"><div class="card h-100 shadow-sm"><div class="card-body"><h3 class="h5">Reservas</h3><p class="text-muted mb-0">Reservas registradas.</p></div></div></a></div>
+            <div class="col-md-4"><a asp-controller="Asignaciones" asp-action="Index" class="text-decoration-none"><div class="card h-100 shadow-sm"><div class="card-body"><h3 class="h5">Asignaciones</h3><p class="text-muted mb-0">Asignación de asientos.</p></div></div></a></div>
+            <div class="col-md-4"><a asp-controller="Compras" asp-action="Index" class="text-decoration-none"><div class="card h-100 shadow-sm"><div class="card-body"><h3 class="h5">Compras</h3><p class="text-muted mb-0">Compras y pagos.</p></div></div></a></div>
+            <div class="col-md-4"><a asp-controller="Catalogos" asp-action="Index" class="text-decoration-none"><div class="card h-100 shadow-sm"><div class="card-body"><h3 class="h5">Catálogos</h3><p class="text-muted mb-0">Tipos y estados del sistema.</p></div></div></a></div>
+            <div class="col-md-4"><a asp-controller="DatosEmisor" asp-action="Index" class="text-decoration-none"><div class="card h-100 shadow-sm"><div class="card-body"><h3 class="h5">Datos del emisor</h3><p class="text-muted mb-0">Datos institucionales.</p></div></div></a></div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            Para acceder a los módulos del sistema, inicia sesión con tu cuenta.
+            <a asp-area="Identity" asp-page="/Account/Login" class="alert-link">Iniciar sesión</a>
+        </div>
+    }
+}

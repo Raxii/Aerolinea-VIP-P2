@@ -1,0 +1,18 @@
+@model MoldeMVC_Core.Models.Pasajero
+@{ ViewData["Title"] = "Editar Pasajeros"; }
+<div class="container py-4"><div class="mb-3"><h1 class="h3 mb-1">Editar Pasajeros</h1><p class="text-muted mb-0">Complete los campos y guarde los cambios.</p></div>
+<div class="card border-0 shadow-sm"><div class="card-body p-4"><form asp-action="Edit" method="post"><input type="hidden" name="id" value="@Model.Id.ToString()" />
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+<div class="row g-3"><div class="col-md-6"><label asp-for="IdSql" class="form-label">ID SQL</label><input asp-for="IdSql" type="number" class="form-control" /><span asp-validation-for="IdSql" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="TipoDocumento.Codigo" class="form-label">Código tipo documento</label><input asp-for="TipoDocumento.Codigo" class="form-control" /><span asp-validation-for="TipoDocumento.Codigo" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="TipoDocumento.Descripcion" class="form-label">Descripción tipo documento</label><input asp-for="TipoDocumento.Descripcion" class="form-control" /><span asp-validation-for="TipoDocumento.Descripcion" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="NumeroDocumento" class="form-label">Número de documento</label><input asp-for="NumeroDocumento" class="form-control" /><span asp-validation-for="NumeroDocumento" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Nombres" class="form-label">Nombres</label><input asp-for="Nombres" class="form-control" /><span asp-validation-for="Nombres" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Apellidos" class="form-label">Apellidos</label><input asp-for="Apellidos" class="form-control" /><span asp-validation-for="Apellidos" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="FechaNacimiento" class="form-label">Fecha de nacimiento</label><input asp-for="FechaNacimiento" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control" /><span asp-validation-for="FechaNacimiento" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Correo" class="form-label">Correo</label><input asp-for="Correo" type="email" class="form-control" /><span asp-validation-for="Correo" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="Telefono" class="form-label">Teléfono</label><input asp-for="Telefono" type="text" class="form-control" /><span asp-validation-for="Telefono" class="text-danger"></span></div>
+<div class="col-md-6"><label asp-for="FechaRegistro" class="form-label">Fecha de registro</label><input asp-for="FechaRegistro" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control" /><span asp-validation-for="FechaRegistro" class="text-danger"></span></div></div>
+<div class="d-flex gap-2 mt-4"><button type="submit" class="btn btn-primary">Guardar</button><a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a></div>
+</form></div></div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
