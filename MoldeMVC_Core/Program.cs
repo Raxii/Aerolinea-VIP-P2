@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MoldeMVC_Core.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+using Microsoft.AspNetCore.Authentication.Google;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,10 +28,47 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 
     // Configuramos la validación de correo
     options.User.RequireUniqueEmail = false;
+    // Permitimos espacios, tildes y ñ en el nombre de usuario (para nombres reales)
+    options.User.AllowedUserNameCharacters =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ áéíóúÁÉÍÓÚñÑüÜ";
 }).AddEntityFrameworkStores<ApplicationDbContext>();
 //*******************************************************************************
 
 builder.Services.AddControllersWithViews();
+//************** Login Federado Con Microsoft y Facebook **********************
+builder.Services.AddAuthentication()
+    // Autenticación con Microsoft
+    .AddMicrosoftAccount(opciones =>
+    {
+    opciones.ClientId = builder.Configuration["MicrosoftClientId"]!;
+    opciones.ClientSecret = builder.Configuration["MicrosoftSecretId"]!;
+    })
+    // Autenticación con Facebook
+    //.AddFacebook(opciones =>
+    //{
+    //    opciones.AppId = builder.Configuration["FacebookAppId"]!;
+    //    opciones.AppSecret = builder.Configuration["FacebookAppSecret"]!;
+    //})
+
+    // Autenticación con Google
+    .AddGoogle(opciones =>
+    {
+        opciones.ClientId = builder.Configuration["GoogleClientId"]!;
+        opciones.ClientSecret = builder.Configuration["GoogleClientSecret"]!;
+    });
+
+
+
+builder.Services.PostConfigure<CookieAuthenticationOptions>(
+    IdentityConstants.ApplicationScheme,
+    opciones =>
+    {
+        opciones.LoginPath = "/Identity/Account/Login";
+        opciones.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    });
+
+//*******************************************************************************
+
 builder.Services.AddSingleton<MongoDbContext>();
 
 var app = builder.Build();
@@ -65,6 +105,7 @@ else
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
 
 app.UseAuthentication();
 app.UseAuthorization();
