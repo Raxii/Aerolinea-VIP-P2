@@ -2,6 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -9,14 +18,6 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
 
 namespace MoldeMVC_Core.Areas.Identity.Pages.Account
 {
@@ -81,6 +82,14 @@ namespace MoldeMVC_Core.Areas.Identity.Pages.Account
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
+            /// 
+            //******************** Agregamos el campo UserName para que se pueda registrar el usuario con un nombre de usuario personalizado ********************
+            [Required]
+            [Display(Name = "Usuario")]
+            public string UserName { get; set; }
+            /// <summ***************************************
+          
+
             [Required]
             [EmailAddress]
             public string Email { get; set; }
@@ -127,13 +136,25 @@ namespace MoldeMVC_Core.Areas.Identity.Pages.Account
                 // If the user does not have an account, then ask the user to create an account.
                 ReturnUrl = returnUrl;
                 ProviderDisplayName = info.ProviderDisplayName;
-                if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+                //if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+                //{
+                //    var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                //    Input = new InputModel
+                //    {
+                //        Email = email,
+                //        UserName = email?.Split('@')[0]
+                //    };
+                //}
+                //*****************************************************************************************************
+                // Tomamos el nombre que envía el proveedor (Google/Microsoft); si no llega, usamos la parte del correo
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                var nombre = info.Principal.FindFirstValue(ClaimTypes.Name);
+                Input = new InputModel
                 {
-                    Input = new InputModel
-                    {
-                        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
-                    };
-                }
+                    Email = email,
+                    UserName = !string.IsNullOrWhiteSpace(nombre) ? nombre : email?.Split('@')[0]
+                };
+                //************************************************************************************************************************************************************************
                 return Page();
             }
         }
@@ -143,6 +164,7 @@ namespace MoldeMVC_Core.Areas.Identity.Pages.Account
             returnUrl = returnUrl ?? Url.Content("~/");
             // Get the information about the user from the external login provider
             var info = await _signInManager.GetExternalLoginInfoAsync();
+           
             if (info == null)
             {
                 ErrorMessage = "Error loading external login information during confirmation.";
@@ -152,8 +174,11 @@ namespace MoldeMVC_Core.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
+                //await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                //***********Agregamos el nombre de usuario y el correo electrónico del usuario al crear la cuenta con el login federado***********
+                await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
+                //*******************************************************************************************************************************
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
                 var result = await _userManager.CreateAsync(user);
