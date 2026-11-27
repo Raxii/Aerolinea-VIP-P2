@@ -1,16 +1,104 @@
 @model MoldeMVC_Core.Models.Aeronave
-@{ ViewData["Title"] = "Nuevo Aeronaves"; }
-<div class="container py-4"><div class="mb-3"><h1 class="h3 mb-1">Nuevo Aeronaves</h1><p class="text-muted mb-0">Complete los campos y guarde los cambios.</p></div>
-<div class="card border-0 shadow-sm"><div class="card-body p-4"><form asp-action="Create" method="post">
-<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-<div class="row g-3"><div class="col-md-6"><label asp-for="IdSql" class="form-label">ID SQL</label><input asp-for="IdSql" type="number" class="form-control" /><span asp-validation-for="IdSql" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Matricula" class="form-label">Matrícula</label><input asp-for="Matricula" class="form-control" /><span asp-validation-for="Matricula" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Estado" class="form-label">Estado</label><input asp-for="Estado" class="form-control" /><span asp-validation-for="Estado" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Modelo.IdSql" class="form-label">ID SQL del modelo</label><input asp-for="Modelo.IdSql" type="number" class="form-control" /><span asp-validation-for="Modelo.IdSql" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Modelo.Fabricante" class="form-label">Fabricante</label><input asp-for="Modelo.Fabricante" class="form-control" /><span asp-validation-for="Modelo.Fabricante" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Modelo.Nombre" class="form-label">Nombre del modelo</label><input asp-for="Modelo.Nombre" class="form-control" /><span asp-validation-for="Modelo.Nombre" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Modelo.CapacidadAsientos" class="form-label">Capacidad de asientos</label><input asp-for="Modelo.CapacidadAsientos" type="number" class="form-control" /><span asp-validation-for="Modelo.CapacidadAsientos" class="text-danger"></span></div>
-<div class="col-12"><label class="form-label fw-semibold">Asientos (JSON)</label><textarea name="asientosJson" class="form-control font-monospace" rows="8">@ViewBag.AsientosJson</textarea><div class="form-text">Ingrese un arreglo JSON. Si no necesita elementos, deje <code>[]</code>.</div><span class="text-danger">@Html.ValidationMessage("asientosJson")</span></div></div>
-<div class="d-flex gap-2 mt-4"><button type="submit" class="btn btn-primary">Guardar</button><a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a></div>
-</form></div></div></div>
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+
+@{
+    ViewData["Title"] = "Nueva aeronave";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white"><h4 class="mb-0">Registrar aeronave</h4></div>
+        <div class="card-body p-3">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <h5>Datos de la aeronave</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="IdSql" class="form-label"></label>
+                        <input asp-for="IdSql" type="number" min="1" class="form-control" />
+                        <span asp-validation-for="IdSql" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Matricula" class="form-label"></label>
+                        <input asp-for="Matricula" class="form-control" placeholder="Ejemplo: AV-04" />
+                        <span asp-validation-for="Matricula" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Estado" class="form-label"></label>
+                        <select asp-for="Estado" class="form-select">
+                            <option value="">Seleccione</option>
+                            <option value="DISPONIBLE">Disponible</option>
+                            <option value="NO_DISPONIBLE">No disponible</option>
+                        </select>
+                        <span asp-validation-for="Estado" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <h5>Modelo embebido</h5>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="Modelo.IdSql" class="form-label">ID SQL del modelo</label>
+                        <input asp-for="Modelo.IdSql" type="number" min="1" class="form-control" />
+                        <span asp-validation-for="Modelo.IdSql" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="Modelo.Fabricante" class="form-label">Fabricante</label>
+                        <input asp-for="Modelo.Fabricante" class="form-control" />
+                        <span asp-validation-for="Modelo.Fabricante" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="Modelo.Nombre" class="form-label">Nombre del modelo</label>
+                        <input asp-for="Modelo.Nombre" class="form-control" />
+                        <span asp-validation-for="Modelo.Nombre" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="Modelo.CapacidadAsientos" class="form-label">Capacidad de asientos</label>
+                        <input asp-for="Modelo.CapacidadAsientos" type="number" min="1" max="7" class="form-control" />
+                        <span asp-validation-for="Modelo.CapacidadAsientos" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-2 mb-2 flex-wrap gap-2">
+                    <h5 class="mb-0">Asientos embebidos (JSON)</h5>
+                    <button type="button" id="cargarPlantilla" class="btn btn-outline-primary btn-sm">
+                        Cargar plantilla Phenom 300E (7 asientos)
+                    </button>
+                </div>
+                <p class="text-muted small">
+                    El JSON debe ser un arreglo. Cada asiento necesita numeroAsiento, codigo, fila, lado y ubicacion.
+                    La plantilla corresponde a los datos del script de MongoDB del proyecto.
+                </p>
+                <textarea id="asientosJson" name="asientosJson" rows="10"
+                          class="form-control font-monospace">@ViewBag.AsientosJson</textarea>
+                <div class="text-danger">@Html.ValidationMessage("asientosJson")</div>
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-success">Guardar aeronave</button>
+                    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('cargarPlantilla').addEventListener('click', function () {
+            const plantilla = [
+                { numeroAsiento: 1, codigo: '1D', fila: 1, lado: 'D', ubicacion: 'Fila 1, lado derecho, ventanilla (junto a la cabina de mando)' },
+                { numeroAsiento: 2, codigo: '2D', fila: 2, lado: 'D', ubicacion: 'Fila 2, lado derecho, ventanilla' },
+                { numeroAsiento: 3, codigo: '2I', fila: 2, lado: 'I', ubicacion: 'Fila 2, lado izquierdo, ventanilla (después de la puerta)' },
+                { numeroAsiento: 4, codigo: '3D', fila: 3, lado: 'D', ubicacion: 'Fila 3, lado derecho, ventanilla' },
+                { numeroAsiento: 5, codigo: '3I', fila: 3, lado: 'I', ubicacion: 'Fila 3, lado izquierdo, ventanilla' },
+                { numeroAsiento: 6, codigo: '4D', fila: 4, lado: 'D', ubicacion: 'Fila 4, lado derecho, ventanilla (junto al baño)' },
+                { numeroAsiento: 7, codigo: '4I', fila: 4, lado: 'I', ubicacion: 'Fila 4, lado izquierdo, ventanilla' }
+            ];
+            document.getElementById('Modelo_IdSql').value = 1;
+            document.getElementById('Modelo_Fabricante').value = 'Embraer';
+            document.getElementById('Modelo_Nombre').value = 'Phenom 300E';
+            document.getElementById('Modelo_CapacidadAsientos').value = 7;
+            document.getElementById('asientosJson').value = JSON.stringify(plantilla, null, 2);
+        });
+    </script>
+}

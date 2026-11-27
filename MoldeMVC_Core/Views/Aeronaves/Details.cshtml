@@ -1,4 +1,62 @@
 @model MoldeMVC_Core.Models.Aeronave
-@{ ViewData["Title"] = "Detalle de Aeronaves"; }
-<div class="container py-4"><div class="d-flex justify-content-between align-items-center mb-3"><div><h1 class="h3 mb-1">Detalle de Aeronaves</h1><p class="text-muted mb-0">Información del documento seleccionado.</p></div><span class="badge bg-secondary">MongoDB</span></div>
-<div class="card border-0 shadow-sm"><div class="card-body"><dl class="row"><div class="col-md-6"><dt class="text-muted small">ID SQL</dt><dd class="fw-semibold">@(Model.IdSql)</dd></div><div class="col-md-6"><dt class="text-muted small">Matrícula</dt><dd class="fw-semibold">@(Model.Matricula)</dd></div><div class="col-md-6"><dt class="text-muted small">Estado</dt><dd class="fw-semibold">@(Model.Estado)</dd></div><div class="col-md-6"><dt class="text-muted small">ID modelo SQL</dt><dd class="fw-semibold">@(Model.Modelo.IdSql)</dd></div><div class="col-md-6"><dt class="text-muted small">Fabricante</dt><dd class="fw-semibold">@(Model.Modelo.Fabricante)</dd></div><div class="col-md-6"><dt class="text-muted small">Modelo</dt><dd class="fw-semibold">@(Model.Modelo.Nombre)</dd></div><div class="col-md-6"><dt class="text-muted small">Capacidad</dt><dd class="fw-semibold">@(Model.Modelo.CapacidadAsientos)</dd></div></dl><h2 class="h5 mt-4">Asientos</h2><div class="table-responsive"><table class="table table-sm table-striped"><thead><tr><th>Número</th><th>Código</th><th>Fila</th><th>Lado</th><th>Ubicación</th></tr></thead><tbody>@foreach (var a in Model.Asientos) { <tr><td>@a.NumeroAsiento</td><td>@a.Codigo</td><td>@a.Fila</td><td>@a.Lado</td><td>@a.Ubicacion</td></tr> }</tbody></table></div><div class="d-flex gap-2 mt-4"><a asp-action="Edit" asp-route-id="@Model.Id.ToString()" class="btn btn-primary">Editar</a><a asp-action="Index" class="btn btn-outline-secondary">Volver al listado</a></div></div></div></div>
+
+@{
+    ViewData["Title"] = "Detalles de aeronave";
+    bool puedeAdministrar = User.IsInRole("Superusuario") || User.IsInRole("Administrador");
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-info text-white"><h4 class="mb-0">Detalles de la aeronave</h4></div>
+        <div class="card-body p-3">
+            <dl class="row">
+                <dt class="col-sm-4">Código de registro</dt><dd class="col-sm-8">@Model.IdSql</dd>
+                <dt class="col-sm-4">Matrícula</dt><dd class="col-sm-8">@Model.Matricula</dd>
+                <dt class="col-sm-4">Estado</dt><dd class="col-sm-8">@Model.Estado</dd>
+                <dt class="col-sm-4">ID SQL del modelo</dt><dd class="col-sm-8">@Model.Modelo?.IdSql</dd>
+                <dt class="col-sm-4">Fabricante</dt><dd class="col-sm-8">@Model.Modelo?.Fabricante</dd>
+                <dt class="col-sm-4">Modelo</dt><dd class="col-sm-8">@Model.Modelo?.Nombre</dd>
+                <dt class="col-sm-4">Capacidad de asientos</dt><dd class="col-sm-8">@Model.Modelo?.CapacidadAsientos</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-header"><h5 class="mb-0">Asientos (@(Model.Asientos?.Count ?? 0))</h5></div>
+        <div class="card-body p-3">
+            <div class="table-responsive">
+                <table class="table table-striped table-sm align-middle">
+                    <thead class="table-dark">
+                        <tr><th>Número</th><th>Código</th><th>Fila</th><th>Lado</th><th>Ubicación</th></tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Asientos != null && Model.Asientos.Count > 0)
+                        {
+                            @foreach (var asiento in Model.Asientos)
+                            {
+                                <tr>
+                                    <td>@asiento.NumeroAsiento</td>
+                                    <td>@asiento.Codigo</td>
+                                    <td>@asiento.Fila</td>
+                                    <td>@asiento.Lado</td>
+                                    <td>@asiento.Ubicacion</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="5" class="text-center text-muted">No hay asientos registrados.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex gap-2">
+                @if (puedeAdministrar)
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.Id.ToString()" class="btn btn-warning">Editar</a>
+                }
+                <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+            </div>
+        </div>
+    </div>
+</div>
