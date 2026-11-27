@@ -2,25 +2,79 @@
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 
+@{
+    string nombreRol = "Sin rol";
+
+    if (SignInManager.IsSignedIn(User))
+    {
+        var usuarioActual = await UserManager.GetUserAsync(User);
+
+        if (usuarioActual != null)
+        {
+            var roles = await UserManager.GetRolesAsync(usuarioActual);
+
+            if (roles.Count > 0)
+            {
+                nombreRol = string.Join(", ", roles);
+            }
+        }
+    }
+}
+
 <ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
-{
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Administrar cuenta">Hola @User.Identity?.Name!</a>
-    </li>
-    <li class="nav-item">
-        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button type="submit" class="nav-link btn btn-link text-dark">Cerrar sesión</button>
-        </form>
-    </li>
-}
-else
-{
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Registrarse</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Iniciar sesión</a>
-    </li>
-}
+
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <!-- NOMBRE DEL USUARIO -->
+        <li class="nav-item">
+            <a class="nav-link text-dark"
+               asp-area="Identity"
+               asp-page="/Account/Manage/Index"
+               title="Administrar cuenta">
+                Hola @User.Identity?.Name!
+            </a>
+        </li>
+
+        <!-- ROL DEL USUARIO -->
+        <li class="nav-item d-flex align-items-center">
+            <span class="badge bg-primary mx-2">
+                @nombreRol
+            </span>
+        </li>
+
+        <!-- CERRAR SESIÓN -->
+        <li class="nav-item">
+            <form class="form-inline"
+                  asp-area="Identity"
+                  asp-page="/Account/Logout"
+                  asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+
+                <button type="submit"
+                        class="nav-link btn btn-link text-dark">
+                    Cerrar sesión
+                </button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <!-- REGISTRARSE -->
+        <li class="nav-item">
+            <a class="nav-link text-dark"
+               asp-area="Identity"
+               asp-page="/Account/Register">
+                Registrarse
+            </a>
+        </li>
+
+        <!-- INICIAR SESIÓN -->
+        <li class="nav-item">
+            <a class="nav-link text-dark"
+               asp-area="Identity"
+               asp-page="/Account/Login">
+                Iniciar sesión
+            </a>
+        </li>
+    }
+
 </ul>
