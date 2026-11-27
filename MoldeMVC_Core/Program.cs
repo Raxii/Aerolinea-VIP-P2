@@ -4,13 +4,16 @@ using MoldeMVC_Core.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Authentication.Google;
+using MoldeMVC_Core.Roles;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 //******************** Configurar la autenticación *********************************
@@ -28,21 +31,28 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 
     // Configuramos la validación de correo
     options.User.RequireUniqueEmail = false;
+
     // Permitimos espacios, tildes y ñ en el nombre de usuario (para nombres reales)
     options.User.AllowedUserNameCharacters =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ áéíóúÁÉÍÓÚñÑüÜ";
-}).AddEntityFrameworkStores<ApplicationDbContext>();
+
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<ApplicationDbContext>();
 //*******************************************************************************
 
 builder.Services.AddControllersWithViews();
+
 //************** Login Federado Con Microsoft y Facebook **********************
 builder.Services.AddAuthentication()
+
     // Autenticación con Microsoft
     .AddMicrosoftAccount(opciones =>
     {
-    opciones.ClientId = builder.Configuration["MicrosoftClientId"]!;
-    opciones.ClientSecret = builder.Configuration["MicrosoftSecretId"]!;
+        opciones.ClientId = builder.Configuration["MicrosoftClientId"]!;
+        opciones.ClientSecret = builder.Configuration["MicrosoftSecretId"]!;
     })
+
     // Autenticación con Facebook
     //.AddFacebook(opciones =>
     //{
@@ -56,8 +66,6 @@ builder.Services.AddAuthentication()
         opciones.ClientId = builder.Configuration["GoogleClientId"]!;
         opciones.ClientSecret = builder.Configuration["GoogleClientSecret"]!;
     });
-
-
 
 builder.Services.PostConfigure<CookieAuthenticationOptions>(
     IdentityConstants.ApplicationScheme,
@@ -77,10 +85,16 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
+
         context.Database.Migrate(); // Aplica las migraciones pendientes
+
+        //************** Crear Roles Automáticamente **********************
+        await RolesUsuarios.CrearRolesAsync(services);
+        //****************************************************************
     }
     catch (Exception ex)
     {
@@ -99,13 +113,14 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+
+    // The default HSTS value is 30 days, you may want to change this for production scenarios.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-app.UseRouting();
 
+app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
