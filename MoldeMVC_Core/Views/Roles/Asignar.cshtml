@@ -1,0 +1,57 @@
+@model Microsoft.AspNetCore.Identity.IdentityUser
+@using Microsoft.AspNetCore.Identity
+@{
+    ViewData["Title"] = "Asignación de roles";
+    var actuales = ViewBag.RolesActuales as IList<string> ?? new List<string>();
+    var disponibles = ViewBag.RolesDisponibles as List<IdentityRole> ?? new List<IdentityRole>();
+    bool esSuper = User.IsInRole("Superusuario");
+}
+<h1 class="h3 mb-3">Gestionar roles de usuario</h1>
+<div class="card shadow-sm"><div class="card-body p-4">
+    <p><strong>Usuario:</strong> @Model.UserName</p>
+    @if (TempData["Mensaje"] != null) { <div class="alert alert-success">@TempData["Mensaje"]</div> }
+    @if (TempData["Error"] != null) { <div class="alert alert-danger">@TempData["Error"]</div> }
+    <h2 class="h5">Roles actuales</h2>
+    @if (actuales.Count == 0)
+    {
+        <p class="text-muted">El usuario aún no tiene roles.</p>
+    }
+    else
+    {
+        <div class="d-flex flex-wrap gap-2 mb-4">
+        @foreach (string rol in actuales)
+        {
+            bool sePuedeQuitar = esSuper || rol == "Counter" || rol == "Pasajero";
+            <form asp-action="Quitar" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="rol" value="@rol" />
+                <button type="submit" class="btn btn-outline-danger btn-sm" disabled="@(!sePuedeQuitar)">
+                    @rol ×
+                </button>
+            </form>
+        }
+        </div>
+    }
+    <h2 class="h5">Agregar rol</h2>
+    <form asp-action="Asignar" method="post" class="row g-2 align-items-end">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="col-md-8">
+            <label for="rol" class="form-label">Rol disponible</label>
+            <select id="rol" name="rol" class="form-select" required>
+                <option value="">Seleccione un rol</option>
+                @foreach (var rol in disponibles)
+                {
+                    if (rol.Name != null && !actuales.Contains(rol.Name))
+                    {
+                        <option value="@rol.Name">@rol.Name</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-4"><button type="submit" class="btn btn-primary w-100">Asignar rol</button></div>
+    </form>
+    <a asp-action="Usuarios" class="btn btn-outline-secondary mt-4">Volver a usuarios</a>
+</div></div>

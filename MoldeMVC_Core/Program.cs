@@ -94,6 +94,8 @@ using (var scope = app.Services.CreateScope())
 
         //************** Crear Roles Automáticamente **********************
         await RolesUsuarios.CrearRolesAsync(services);
+        await RolesUsuarios.CrearUsuariosAsync(
+            services, builder.Configuration);
         //****************************************************************
     }
     catch (Exception ex)
