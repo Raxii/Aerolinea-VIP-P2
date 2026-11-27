@@ -1,3 +1,32 @@
 @model MoldeMVC_Core.Models.Aeronave
-@{ ViewData["Title"] = "Eliminar Aeronaves"; }
-<div class="container py-4"><div class="card border-danger shadow-sm"><div class="card-header bg-danger text-white"><h1 class="h5 mb-0">Confirmar eliminación</h1></div><div class="card-body"><p>¿Está seguro de eliminar este registro?</p><h2 class="h5">@(Model.Matricula + " - " + Model.Modelo.Nombre)</h2><p class="text-muted small">Esta acción no se puede deshacer.</p><form asp-action="Delete" method="post"><input type="hidden" name="id" value="@Model.Id.ToString()" /><button type="submit" class="btn btn-danger">Sí, eliminar</button><a asp-action="Index" class="btn btn-outline-secondary ms-2">Cancelar</a></form></div></div></div>
+
+@{
+    ViewData["Title"] = "Eliminar aeronave";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-danger text-white"><h4 class="mb-0">Eliminar aeronave</h4></div>
+        <div class="card-body p-3">
+            <div class="alert alert-warning">
+                ¿Está seguro de que desea eliminar esta aeronave? La operación no se puede deshacer.
+                Antes de eliminar aeronaves reales, verifique que no existan vuelos que las utilicen.
+            </div>
+            <dl class="row">
+                <dt class="col-sm-4">ID SQL</dt><dd class="col-sm-8">@Model.IdSql</dd>
+                <dt class="col-sm-4">Matrícula</dt><dd class="col-sm-8">@Model.Matricula</dd>
+                <dt class="col-sm-4">Estado</dt><dd class="col-sm-8">@Model.Estado</dd>
+                <dt class="col-sm-4">Fabricante</dt><dd class="col-sm-8">@Model.Modelo?.Fabricante</dd>
+                <dt class="col-sm-4">Modelo</dt><dd class="col-sm-8">@Model.Modelo?.Nombre</dd>
+                <dt class="col-sm-4">Capacidad</dt><dd class="col-sm-8">@Model.Modelo?.CapacidadAsientos</dd>
+                <dt class="col-sm-4">Asientos</dt><dd class="col-sm-8">@(Model.Asientos?.Count ?? 0)</dd>
+            </dl>
+            <form asp-action="Delete" asp-route-id="@Model.Id.ToString()" method="post">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-danger">Confirmar eliminación</button>
+                    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

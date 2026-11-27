@@ -1,3 +1,84 @@
 @model MoldeMVC_Core.Models.Aeropuerto
-@{ ViewData["Title"] = "Eliminar Aeropuertos"; }
-<div class="container py-4"><div class="card border-danger shadow-sm"><div class="card-header bg-danger text-white"><h1 class="h5 mb-0">Confirmar eliminación</h1></div><div class="card-body"><p>¿Está seguro de eliminar este registro?</p><h2 class="h5">@(Model.Nombre + " (" + Model.CodigoIATA + ")")</h2><p class="text-muted small">Esta acción no se puede deshacer.</p><form asp-action="Delete" method="post"><input type="hidden" name="id" value="@Model.Id.ToString()" /><button type="submit" class="btn btn-danger">Sí, eliminar</button><a asp-action="Index" class="btn btn-outline-secondary ms-2">Cancelar</a></form></div></div></div>
+
+@{
+    ViewData["Title"] = "Eliminar aeropuerto";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">Eliminar Aeropuerto</h4>
+        </div>
+
+        <div class="card-body p-3">
+
+            <div class="alert alert-warning">
+                ¿Está seguro de que desea eliminar este aeropuerto?
+                Esta operación no se puede deshacer.
+            </div>
+
+            <dl class="row">
+
+                <dt class="col-sm-4">
+                    Código de registro
+                </dt>
+                <dd class="col-sm-8">
+                    @Model.IdSql
+                </dd>
+
+                <dt class="col-sm-4">
+                    Código IATA
+                </dt>
+                <dd class="col-sm-8">
+                    @Model.CodigoIATA
+                </dd>
+
+                <dt class="col-sm-4">
+                    Nombre
+                </dt>
+                <dd class="col-sm-8">
+                    @Model.Nombre
+                </dd>
+
+                <dt class="col-sm-4">
+                    Localidad
+                </dt>
+                <dd class="col-sm-8">
+                    @Model.Localidad
+                </dd>
+
+                <dt class="col-sm-4">
+                    Estado
+                </dt>
+                <dd class="col-sm-8">
+                    @(Model.Activo ? "Activo" : "Inactivo")
+                </dd>
+
+            </dl>
+
+            <form asp-action="Delete"
+                  asp-route-id="@Model.Id.ToString()"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="d-flex gap-2">
+
+                    <button type="submit" class="btn btn-danger">
+                        Confirmar eliminación
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-secondary">
+                        Cancelar
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>

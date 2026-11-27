@@ -1,0 +1,22 @@
+@model Microsoft.AspNetCore.Identity.IdentityRole
+@using Microsoft.AspNetCore.Identity
+@{
+    ViewData["Title"] = "Detalles del rol";
+    var usuarios = ViewBag.Usuarios as IList<IdentityUser> ?? new List<IdentityUser>();
+}
+<h1 class="h3 mb-3">Detalles del rol</h1>
+<div class="card shadow-sm"><div class="card-body">
+    <dl class="row">
+        <dt class="col-sm-3">Rol</dt><dd class="col-sm-9">@Model.Name</dd>
+        <dt class="col-sm-3">Id</dt><dd class="col-sm-9"><code>@Model.Id</code></dd>
+        <dt class="col-sm-3">Usuarios asignados</dt><dd class="col-sm-9">@usuarios.Count</dd>
+    </dl>
+    @if (usuarios.Count > 0)
+    {
+        <ul class="list-group mb-3">
+            @foreach (var u in usuarios) { <li class="list-group-item">@u.UserName</li> }
+        </ul>
+    }
+    <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+    <a asp-action="Usuarios" class="btn btn-primary">Gestionar usuarios</a>
+</div></div>
