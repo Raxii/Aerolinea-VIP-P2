@@ -1,8 +1,10 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MoldeMVC_Core.Models
 {
+    [ModelMetadataType(typeof(AeropuertoMetadata))]
     [BsonIgnoreExtraElements]
     public class Aeropuerto
     {
