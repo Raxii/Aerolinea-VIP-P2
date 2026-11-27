@@ -1,0 +1,13 @@
+@model Microsoft.AspNetCore.Identity.IdentityRole
+@{ ViewData["Title"] = "Eliminar rol"; }
+<h1 class="h3 mb-3">Eliminar rol</h1>
+<div class="alert alert-warning">Solo se pueden eliminar roles adicionales sin usuarios asignados.</div>
+<div class="card shadow-sm"><div class="card-body p-4">
+    <p>¿Deseas eliminar el rol <strong>@Model.Name</strong>?</p>
+    <p>Usuarios asignados: <strong>@ViewBag.CantidadUsuarios</strong></p>
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+        @Html.AntiForgeryToken()
+        <button class="btn btn-danger" type="submit" disabled="@(ViewBag.CantidadUsuarios > 0)">Confirmar eliminación</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+    </form>
+</div></div>

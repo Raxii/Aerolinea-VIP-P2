@@ -4,3 +4,7 @@
 *.user
 *.suo
 TestResults/
+# Secretos y credenciales
+secrets.json
+**/secrets.json
+appsettings.Local.json

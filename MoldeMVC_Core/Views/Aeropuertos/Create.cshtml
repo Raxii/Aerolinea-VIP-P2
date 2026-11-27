@@ -1,13 +1,100 @@
 @model MoldeMVC_Core.Models.Aeropuerto
-@{ ViewData["Title"] = "Nuevo Aeropuertos"; }
-<div class="container py-4"><div class="mb-3"><h1 class="h3 mb-1">Nuevo Aeropuertos</h1><p class="text-muted mb-0">Complete los campos y guarde los cambios.</p></div>
-<div class="card border-0 shadow-sm"><div class="card-body p-4"><form asp-action="Create" method="post">
-<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-<div class="row g-3"><div class="col-md-6"><label asp-for="IdSql" class="form-label">ID SQL</label><input asp-for="IdSql" type="number" class="form-control" /><span asp-validation-for="IdSql" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="CodigoIATA" class="form-label">Código IATA</label><input asp-for="CodigoIATA" class="form-control" /><span asp-validation-for="CodigoIATA" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Nombre" class="form-label">Nombre</label><input asp-for="Nombre" class="form-control" /><span asp-validation-for="Nombre" class="text-danger"></span></div>
-<div class="col-md-6"><label asp-for="Localidad" class="form-label">Localidad</label><input asp-for="Localidad" class="form-control" /><span asp-validation-for="Localidad" class="text-danger"></span></div>
-<div class="col-md-6"><div class="form-check mt-4"><input asp-for="Activo" class="form-check-input" /><label asp-for="Activo" class="form-check-label">Activo</label></div></div></div>
-<div class="d-flex gap-2 mt-4"><button type="submit" class="btn btn-primary">Guardar</button><a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a></div>
-</form></div></div></div>
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+
+@{
+    ViewData["Title"] = "Crear aeropuerto";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Registrar Aeropuerto</h4>
+        </div>
+
+        <div class="card-body p-3">
+
+            <form asp-action="Create" method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3"></div>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="IdSql" class="form-label"></label>
+
+                        <input asp-for="IdSql"
+                               type="number"
+                               class="form-control" />
+
+                        <span asp-validation-for="IdSql"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CodigoIATA" class="form-label"></label>
+
+                        <input asp-for="CodigoIATA"
+                               class="form-control"
+                               maxlength="3"
+                               placeholder="Ejemplo: UIO"
+                               style="text-transform:uppercase" />
+
+                        <span asp-validation-for="CodigoIATA"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Nombre" class="form-label"></label>
+
+                        <input asp-for="Nombre"
+                               class="form-control"
+                               placeholder="Nombre del aeropuerto" />
+
+                        <span asp-validation-for="Nombre"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Localidad" class="form-label"></label>
+
+                        <input asp-for="Localidad"
+                               class="form-control"
+                               placeholder="Ciudad o localidad" />
+
+                        <span asp-validation-for="Localidad"
+                              class="text-danger"></span>
+                    </div>
+
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="Activo" class="form-check-input" />
+                    <label asp-for="Activo" class="form-check-label"></label>
+                </div>
+
+                <div class="d-flex gap-2">
+
+                    <button type="submit" class="btn btn-success">
+                        Guardar
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-secondary">
+                        Cancelar
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
