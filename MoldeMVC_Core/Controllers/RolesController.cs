@@ -1,299 +1,408 @@
+
+using System.Linq;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using MoldeMVC_Core.Utilitarios.Authorization;
+using MoldeMVC_Core.Utilitarios.Services;
 
 namespace MoldeMVC_Core.Controllers
 {
-    // MOD-11: gestión de roles con ASP.NET Core Identity.
-    // No modifica las conexiones, ni usa ViewModels ni DTOs.
-    [Authorize(Roles = "Superusuario,Administrador")]
+    // Acceso para Administrador y Superusuario.
+    [Authorize(Roles =
+        PoliticasAutorizacion.RolSuperusuario + "," +
+        PoliticasAutorizacion.RolAdministrador)]
     public class RolesController : Controller
     {
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly UserManager<IdentityUser> _userManager;
-
-        private static readonly string[] RolesIniciales =
-        {
-            "Superusuario", "Administrador", "Counter", "Pasajero"
-        };
+        private readonly GestionRolesService _gestionRolesService;
 
         public RolesController(
-            RoleManager<IdentityRole> roleManager,
-            UserManager<IdentityUser> userManager)
+            GestionRolesService gestionRolesService)
         {
-            _roleManager = roleManager;
-            _userManager = userManager;
+            _gestionRolesService = gestionRolesService;
         }
 
-        private bool EsSuperusuario() => User.IsInRole("Superusuario");
+        // =====================================================
+        // MÉTODOS AUXILIARES
+        // =====================================================
 
-        private static bool EsRolInicial(string? nombre) =>
-            RolesIniciales.Any(r => string.Equals(r, nombre,
-                StringComparison.OrdinalIgnoreCase));
-
-        private static bool EsRolPrivilegiado(string? nombre) =>
-            string.Equals(nombre, "Superusuario", StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(nombre, "Administrador", StringComparison.OrdinalIgnoreCase);
-
-        private async Task<bool> PuedeAdministrarUsuarioAsync(IdentityUser usuario)
+        private bool EsSuperusuario()
         {
-            if (EsSuperusuario()) return true;
-            var roles = await _userManager.GetRolesAsync(usuario);
-            return !roles.Any(EsRolPrivilegiado);
+            return User.IsInRole(
+                PoliticasAutorizacion.RolSuperusuario);
         }
 
-        private static bool NombreValido(string? nombre) =>
-            !string.IsNullOrWhiteSpace(nombre) && nombre.Trim().Length <= 50;
+        private string? UsuarioActualId
+        {
+            get
+            {
+                return User.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
+            }
+        }
 
-        // LISTAR ROLES
+        private async Task<IActionResult> MostrarAsignacionAsync(
+            IdentityUser usuario)
+        {
+            ViewBag.RolesActuales =
+                await _gestionRolesService.ObtenerRolesUsuarioAsync(
+                    usuario.Id);
+
+            ViewBag.RolesDisponibles =
+                await _gestionRolesService.ObtenerRolesDisponiblesAsync(
+                    EsSuperusuario());
+
+            return View("Asignar", usuario);
+        }
+
+        private void AgregarErrores(
+            IdentityResult resultado)
+        {
+            foreach (var error in resultado.Errors)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    error.Description);
+            }
+        }
+
+        // =====================================================
+        // 1. LISTAR ROLES
+        // =====================================================
+
         public async Task<IActionResult> Index()
         {
-            var roles = await _roleManager.Roles
-                .OrderBy(r => r.Name).ToListAsync();
+            var roles =
+                await _gestionRolesService.ObtenerRolesAsync();
+
             return View(roles);
         }
 
-        // DETALLES DEL ROL
+        // =====================================================
+        // 2. DETALLES DEL ROL
+        // =====================================================
+
         public async Task<IActionResult> Details(string id)
         {
-            var rol = await _roleManager.FindByIdAsync(id);
-            if (rol == null) return NotFound();
-            ViewBag.Usuarios = await _userManager.GetUsersInRoleAsync(rol.Name!);
+            var rol =
+                await _gestionRolesService.ObtenerRolPorIdAsync(id);
+
+            if (rol == null)
+                return NotFound();
+
+            ViewBag.Usuarios =
+                await _gestionRolesService.ObtenerUsuariosEnRolAsync(
+                    rol.Name ?? string.Empty);
+
             return View(rol);
         }
 
-        // CREAR ROL: SOLO SUPERUSUARIO
-        [Authorize(Roles = "Superusuario")]
-        [HttpGet]
-        public IActionResult Create() => View(new IdentityRole());
+        // =====================================================
+        // 3. CREAR ROL
+        // SOLO SUPERUSUARIO
+        // =====================================================
 
-        [Authorize(Roles = "Superusuario")]
+        [Authorize(Roles = PoliticasAutorizacion.RolSuperusuario)]
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View(new IdentityRole());
+        }
+
+        [Authorize(Roles = PoliticasAutorizacion.RolSuperusuario)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string? nombre)
         {
-            nombre = nombre?.Trim();
-            if (!NombreValido(nombre))
-                ModelState.AddModelError("nombre", "Ingrese un nombre de rol de hasta 50 caracteres.");
-            if (ModelState.IsValid && await _roleManager.RoleExistsAsync(nombre!))
-                ModelState.AddModelError("nombre", "Ya existe un rol con ese nombre.");
+            var resultado =
+                await _gestionRolesService.CrearRolAsync(nombre);
 
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Nombre = nombre;
-                return View(new IdentityRole());
-            }
-
-            var resultado = await _roleManager.CreateAsync(new IdentityRole(nombre!));
             if (!resultado.Succeeded)
             {
-                foreach (var error in resultado.Errors)
-                    ModelState.AddModelError(string.Empty, error.Description);
+                AgregarErrores(resultado);
+
                 ViewBag.Nombre = nombre;
-                return View(new IdentityRole());
+
+                return View(new IdentityRole
+                {
+                    Name = nombre?.Trim()
+                });
             }
 
-            TempData["Mensaje"] = "Rol creado correctamente.";
+            TempData["Mensaje"] =
+                "Rol creado correctamente.";
+
             return RedirectToAction(nameof(Index));
         }
 
-        // EDITAR NOMBRE: SOLO ROLES ADICIONALES, NO LOS 4 INICIALES
-        [Authorize(Roles = "Superusuario")]
+        // =====================================================
+        // 4. EDITAR ROL
+        // SOLO SUPERUSUARIO
+        // =====================================================
+
+        [Authorize(Roles = PoliticasAutorizacion.RolSuperusuario)]
         [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
-            var rol = await _roleManager.FindByIdAsync(id);
-            if (rol == null) return NotFound();
-            if (EsRolInicial(rol.Name)) return Forbid();
+            var rol =
+                await _gestionRolesService.ObtenerRolPorIdAsync(id);
+
+            if (rol == null)
+                return NotFound();
+
+            if (PoliticasAutorizacion.EsRolInicial(rol.Name))
+                return Forbid();
+
             return View(rol);
         }
 
-        [Authorize(Roles = "Superusuario")]
+        [Authorize(Roles = PoliticasAutorizacion.RolSuperusuario)]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, string? nombre)
+        public async Task<IActionResult> Edit(
+            string id,
+            string? nombre)
         {
-            var rol = await _roleManager.FindByIdAsync(id);
-            if (rol == null) return NotFound();
-            if (EsRolInicial(rol.Name)) return Forbid();
+            var resultado =
+                await _gestionRolesService.ActualizarRolAsync(
+                    id,
+                    nombre);
 
-            nombre = nombre?.Trim();
-            if (!NombreValido(nombre))
-                ModelState.AddModelError("nombre", "Ingrese un nombre de rol de hasta 50 caracteres.");
-
-            if (ModelState.IsValid && !string.Equals(rol.Name, nombre,
-                StringComparison.OrdinalIgnoreCase) && await _roleManager.RoleExistsAsync(nombre!))
-                ModelState.AddModelError("nombre", "Ya existe un rol con ese nombre.");
-
-            if (!ModelState.IsValid)
+            if (resultado.Succeeded)
             {
-                ViewBag.Nombre = nombre;
-                return View(rol);
+                TempData["Mensaje"] =
+                    "Rol actualizado correctamente.";
+
+                return RedirectToAction(nameof(Index));
             }
 
-            rol.Name = nombre;
-            var resultado = await _roleManager.UpdateAsync(rol);
-            if (!resultado.Succeeded)
-            {
-                foreach (var error in resultado.Errors)
-                    ModelState.AddModelError(string.Empty, error.Description);
-                ViewBag.Nombre = nombre;
-                return View(rol);
-            }
+            if (resultado.Errors.Any(
+                e => e.Code == "RolNoEncontrado"))
+                return NotFound();
 
-            TempData["Mensaje"] = "Rol actualizado correctamente.";
-            return RedirectToAction(nameof(Index));
+            if (resultado.Errors.Any(
+                e => e.Code == "RolProtegido"))
+                return Forbid();
+
+            AgregarErrores(resultado);
+
+            var rol =
+                await _gestionRolesService.ObtenerRolPorIdAsync(id);
+
+            if (rol == null)
+                return NotFound();
+
+            rol.Name = nombre?.Trim();
+
+            return View(rol);
         }
 
-        // ELIMINAR ROL: SOLO ROLES ADICIONALES SIN USUARIOS
-        [Authorize(Roles = "Superusuario")]
+        // =====================================================
+        // 5. ELIMINAR ROL
+        // SOLO SUPERUSUARIO
+        // =====================================================
+
+        [Authorize(Roles = PoliticasAutorizacion.RolSuperusuario)]
         [HttpGet]
         public async Task<IActionResult> Delete(string id)
         {
-            var rol = await _roleManager.FindByIdAsync(id);
-            if (rol == null) return NotFound();
-            if (EsRolInicial(rol.Name)) return Forbid();
-            ViewBag.CantidadUsuarios = (await _userManager.GetUsersInRoleAsync(rol.Name!)).Count;
+            var rol =
+                await _gestionRolesService.ObtenerRolPorIdAsync(id);
+
+            if (rol == null)
+                return NotFound();
+
+            if (PoliticasAutorizacion.EsRolInicial(rol.Name))
+                return Forbid();
+
+            var usuarios =
+                await _gestionRolesService.ObtenerUsuariosEnRolAsync(
+                    rol.Name ?? string.Empty);
+
+            ViewBag.CantidadUsuarios = usuarios.Count;
+
             return View(rol);
         }
 
-        [Authorize(Roles = "Superusuario")]
+        [Authorize(Roles = PoliticasAutorizacion.RolSuperusuario)]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var rol = await _roleManager.FindByIdAsync(id);
-            if (rol == null) return NotFound();
-            if (EsRolInicial(rol.Name)) return Forbid();
+            var resultado =
+                await _gestionRolesService.EliminarRolAsync(id);
 
-            if ((await _userManager.GetUsersInRoleAsync(rol.Name!)).Count > 0)
-            {
-                TempData["Error"] = "No se puede eliminar un rol con usuarios asignados.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            var resultado = await _roleManager.DeleteAsync(rol);
             if (!resultado.Succeeded)
             {
-                TempData["Error"] = string.Join("; ",
+                TempData["Error"] = string.Join(
+                    "; ",
                     resultado.Errors.Select(e => e.Description));
+
                 return RedirectToAction(nameof(Index));
             }
 
-            TempData["Mensaje"] = "Rol eliminado correctamente.";
+            TempData["Mensaje"] =
+                "Rol eliminado correctamente.";
+
             return RedirectToAction(nameof(Index));
         }
 
-        // LISTAR USUARIOS Y SUS ROLES
+        // =====================================================
+        // 6. LISTAR USUARIOS Y SUS ROLES
+        // =====================================================
+
         public async Task<IActionResult> Usuarios()
         {
-            var usuarios = await _userManager.Users
-                .OrderBy(u => u.UserName).ToListAsync();
-            var asignaciones = new Dictionary<string, string>();
+            var usuarios =
+                await _gestionRolesService.ObtenerUsuariosAsync();
+
+            var asignaciones =
+                new Dictionary<string, string>();
+
+            var usuariosRestringidos =
+                new HashSet<string>();
 
             foreach (var usuario in usuarios)
             {
-                var roles = await _userManager.GetRolesAsync(usuario);
-                asignaciones[usuario.Id] = string.Join(", ", roles);
+                var roles =
+                    await _gestionRolesService.ObtenerRolesUsuarioAsync(
+                        usuario.Id);
+
+                asignaciones[usuario.Id] =
+                    roles.Count > 0
+                        ? string.Join(", ", roles)
+                        : "Sin rol";
+
+                var puedeAdministrar =
+                    await _gestionRolesService.PuedeAdministrarUsuarioAsync(
+                        usuario.Id,
+                        EsSuperusuario(),
+                        UsuarioActualId);
+
+                if (!puedeAdministrar)
+                {
+                    usuariosRestringidos.Add(usuario.Id);
+                }
             }
 
             ViewBag.RolesUsuarios = asignaciones;
+
+            ViewBag.UsuariosRestringidos =
+                usuariosRestringidos;
+
             return View(usuarios);
         }
 
-        private async Task<IActionResult> MostrarAsignacionAsync(IdentityUser usuario)
-        {
-            ViewBag.RolesActuales = await _userManager.GetRolesAsync(usuario);
-            var todos = await _roleManager.Roles.OrderBy(r => r.Name).ToListAsync();
-            ViewBag.RolesDisponibles = EsSuperusuario()
-                ? todos
-                : todos.Where(r => string.Equals(r.Name, "Counter", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(r.Name, "Pasajero", StringComparison.OrdinalIgnoreCase)).ToList();
-            return View("Asignar", usuario);
-        }
+        // =====================================================
+        // 7. ASIGNAR ROLES - GET
+        // =====================================================
 
-        // ASIGNAR ROLES A UN USUARIO EXISTENTE
         [HttpGet]
         public async Task<IActionResult> Asignar(string id)
         {
-            var usuario = await _userManager.FindByIdAsync(id);
-            if (usuario == null) return NotFound();
-            if (!await PuedeAdministrarUsuarioAsync(usuario)) return Forbid();
+            var usuario =
+                await _gestionRolesService.ObtenerUsuarioPorIdAsync(id);
+
+            if (usuario == null)
+                return NotFound();
+
+            var puedeAdministrar =
+                await _gestionRolesService.PuedeAdministrarUsuarioAsync(
+                    id,
+                    EsSuperusuario(),
+                    UsuarioActualId);
+
+            if (!puedeAdministrar)
+                return Forbid();
+
             return await MostrarAsignacionAsync(usuario);
         }
 
+        // =====================================================
+        // 8. ASIGNAR ROLES - POST
+        // =====================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Asignar(string id, string? rol)
+        public async Task<IActionResult> Asignar(
+            string id,
+            string? rol)
         {
-            var usuario = await _userManager.FindByIdAsync(id);
-            if (usuario == null) return NotFound();
-            if (!await PuedeAdministrarUsuarioAsync(usuario)) return Forbid();
+            var usuario =
+                await _gestionRolesService.ObtenerUsuarioPorIdAsync(id);
 
-            if (!EsSuperusuario() &&
-                !string.Equals(rol, "Counter", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(rol, "Pasajero", StringComparison.OrdinalIgnoreCase))
-                return Forbid();
+            if (usuario == null)
+                return NotFound();
 
-            var rolExistente = string.IsNullOrWhiteSpace(rol)
-                ? null : await _roleManager.FindByNameAsync(rol);
-            if (rolExistente == null)
+            var resultado =
+                await _gestionRolesService.AsignarRolAsync(
+                    id,
+                    rol,
+                    UsuarioActualId,
+                    EsSuperusuario());
+
+            if (!resultado.Succeeded)
             {
-                ModelState.AddModelError("rol", "Seleccione un rol válido.");
+                if (resultado.Errors.Any(
+                    e => e.Code == "AccesoDenegado"))
+                    return Forbid();
+
+                AgregarErrores(resultado);
+
                 return await MostrarAsignacionAsync(usuario);
             }
 
-            if (!await _userManager.IsInRoleAsync(usuario, rolExistente.Name!))
-            {
-                var resultado = await _userManager.AddToRoleAsync(usuario, rolExistente.Name!);
-                if (!resultado.Succeeded)
-                {
-                    foreach (var error in resultado.Errors)
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    return await MostrarAsignacionAsync(usuario);
-                }
-            }
+            TempData["Mensaje"] =
+                "Rol asignado correctamente.";
 
-            TempData["Mensaje"] = "Rol asignado correctamente.";
-            return RedirectToAction(nameof(Asignar), new { id });
+            return RedirectToAction(
+                nameof(Asignar),
+                new { id });
         }
 
-        // QUITAR ROL A UN USUARIO, CON PROTECCIÓN AL SUPERUSUARIO
+        // =====================================================
+        // 9. RETIRAR ROLES
+        // =====================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Quitar(string id, string? rol)
+        public async Task<IActionResult> Quitar(
+            string id,
+            string? rol)
         {
-            var usuario = await _userManager.FindByIdAsync(id);
-            if (usuario == null) return NotFound();
-            if (!await PuedeAdministrarUsuarioAsync(usuario)) return Forbid();
+            var usuario =
+                await _gestionRolesService.ObtenerUsuarioPorIdAsync(id);
 
-            if (!EsSuperusuario() &&
-                !string.Equals(rol, "Counter", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(rol, "Pasajero", StringComparison.OrdinalIgnoreCase))
-                return Forbid();
+            if (usuario == null)
+                return NotFound();
 
-            if (string.IsNullOrWhiteSpace(rol) ||
-                !await _userManager.IsInRoleAsync(usuario, rol))
-                return BadRequest("El usuario no tiene ese rol.");
+            var resultado =
+                await _gestionRolesService.QuitarRolAsync(
+                    id,
+                    rol,
+                    UsuarioActualId,
+                    EsSuperusuario());
 
-            if (string.Equals(rol, "Superusuario", StringComparison.OrdinalIgnoreCase))
+            if (!resultado.Succeeded)
             {
-                var actuales = await _userManager.GetUsersInRoleAsync("Superusuario");
-                if (actuales.Count <= 1 || usuario.Id == _userManager.GetUserId(User))
-                {
-                    TempData["Error"] = "No se puede eliminar el último superusuario ni quitarse el rol propio.";
-                    return RedirectToAction(nameof(Asignar), new { id });
-                }
+                if (resultado.Errors.Any(
+                    e => e.Code == "AccesoDenegado"))
+                    return Forbid();
+
+                TempData["Error"] = string.Join(
+                    "; ",
+                    resultado.Errors.Select(e => e.Description));
+            }
+            else
+            {
+                TempData["Mensaje"] =
+                    "Rol retirado correctamente.";
             }
 
-            var resultado = await _userManager.RemoveFromRoleAsync(usuario, rol);
-            if (!resultado.Succeeded)
-                TempData["Error"] = string.Join("; ", resultado.Errors.Select(e => e.Description));
-            else
-                TempData["Mensaje"] = "Rol retirado correctamente.";
-
-            return RedirectToAction(nameof(Asignar), new { id });
+            return RedirectToAction(
+                nameof(Asignar),
+                new { id });
         }
     }
 }
