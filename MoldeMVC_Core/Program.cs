@@ -39,20 +39,16 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
-    // Configuración de contraseñas
     options.Password.RequireDigit = false;
     options.Password.RequireLowercase = false;
     options.Password.RequireUppercase = false;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequiredLength = 3;
 
-    // Confirmación de cuenta
     options.SignIn.RequireConfirmedAccount = false;
 
-    // Correo electrónico
     options.User.RequireUniqueEmail = false;
 
-    // Nombre de usuario
     options.User.AllowedUserNameCharacters =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ áéíóúÁÉÍÓÚñÑüÜ";
 
@@ -84,7 +80,6 @@ builder.Services.AddRazorPages();
 // 6. REGISTRO DE SERVICIOS
 // =====================================================
 
-// Registrar una sola vez el servicio de gestión de roles
 builder.Services.AddScoped<GestionRolesService>();
 
 // =====================================================
@@ -95,6 +90,7 @@ builder.Services.AddScoped<GestionRolesService>();
 var autenticacion = builder.Services.AddAuthentication();
 
 // Credenciales Microsoft
+
 var microsoftClientId =
     builder.Configuration["MicrosoftClientId"];
 
@@ -112,6 +108,7 @@ if (!string.IsNullOrWhiteSpace(microsoftClientId) &&
 }
 
 // Credenciales Google
+
 var googleClientId =
     builder.Configuration["GoogleClientId"];
 
@@ -155,10 +152,10 @@ builder.Services.AddSingleton<MongoDbContext>();
 var app = builder.Build();
 
 // =====================================================
-// 11. MIGRACIONES Y CONFIGURACIÓN INICIAL
+// 11. MIGRACIONES E INICIALIZACIÓN ASÍNCRONA
 // =====================================================
 
-using (var scope = app.Services.CreateScope())
+await using (var scope = app.Services.CreateAsyncScope())
 {
     var services = scope.ServiceProvider;
 
@@ -167,7 +164,7 @@ using (var scope = app.Services.CreateScope())
         var context =
             services.GetRequiredService<ApplicationDbContext>();
 
-        // Aplicar migraciones pendientes
+        // Aplicar migraciones pendientes de SQL Server
         await context.Database.MigrateAsync();
 
         // Crear roles iniciales
@@ -186,6 +183,8 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(
             ex,
             "Error al inicializar la base de datos y los roles.");
+
+        throw;
     }
 }
 
@@ -239,7 +238,7 @@ app.MapRazorPages()
     .WithStaticAssets();
 
 // =====================================================
-// 17. EJECUTAR APLICACIÓN
+// 17. EJECUCIÓN ASÍNCRONA
 // =====================================================
 
-app.Run();
+await app.RunAsync();
