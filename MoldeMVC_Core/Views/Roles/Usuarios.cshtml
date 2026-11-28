@@ -1,40 +1,143 @@
 @model IEnumerable<Microsoft.AspNetCore.Identity.IdentityUser>
+
+@using System.Collections.Generic
+
 @{
     ViewData["Title"] = "Usuarios y roles";
-    var asignaciones = ViewBag.RolesUsuarios as Dictionary<string, string>
+
+    var asignaciones =
+        ViewBag.RolesUsuarios as Dictionary<string, string>
         ?? new Dictionary<string, string>();
-    bool esSuper = User.IsInRole("Superusuario");
+
+    var restringidos =
+        ViewBag.UsuariosRestringidos as HashSet<string>;
 }
+
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3">Usuarios y roles</h1>
-    <a asp-action="Index" class="btn btn-outline-secondary">Volver a roles</a>
+
+    <a asp-action="Index"
+       class="btn btn-outline-secondary">
+        Volver a roles
+    </a>
 </div>
-@if (TempData["Mensaje"] != null) { <div class="alert alert-success">@TempData["Mensaje"]</div> }
-@if (TempData["Error"] != null) { <div class="alert alert-danger">@TempData["Error"]</div> }
-<div class="card shadow-sm"><div class="card-body p-3">
-<table class="table table-hover align-middle">
-    <thead><tr><th>Usuario</th><th>Correo</th><th>Roles</th><th class="text-end">Acción</th></tr></thead>
-    <tbody>
-    @foreach (var usuario in Model)
-    {
-        asignaciones.TryGetValue(usuario.Id, out var lista);
-        bool elevado = (lista ?? "").Split(", ").Any(r => r == "Superusuario" || r == "Administrador");
-        <tr>
-            <td>@usuario.UserName</td>
-            <td>@usuario.Email</td>
-            <td>@(string.IsNullOrWhiteSpace(lista) ? "Sin rol" : lista)</td>
-            <td class="text-end">
-                @if (esSuper || !elevado)
-                {
-                    <a asp-action="Asignar" asp-route-id="@usuario.Id" class="btn btn-sm btn-primary">Gestionar roles</a>
-                }
-                else
-                {
-                    <span class="text-muted small">Restringido</span>
-                }
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>
-</div></div>
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Mensaje"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["Error"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-3">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead class="table-light">
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Correo</th>
+                        <th>Roles asignados</th>
+                        <th class="text-end">Acción</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var usuario in Model)
+                    {
+                        asignaciones.TryGetValue(
+                            usuario.Id,
+                            out var lista);
+
+                        bool puedeGestionar =
+                            restringidos != null &&
+                            !restringidos.Contains(usuario.Id);
+
+                        <tr>
+
+                            <td>
+                                <strong>@usuario.UserName</strong>
+                            </td>
+
+                            <td>
+                                @(string.IsNullOrWhiteSpace(usuario.Email)
+                                    ? "Sin correo"
+                                    : usuario.Email)
+                            </td>
+
+                            <td>
+                                @if (string.IsNullOrWhiteSpace(lista))
+                                {
+                                    <span class="text-muted">
+                                        Sin rol asignado
+                                    </span>
+                                }
+                                else
+                                {
+                                    @foreach (var rol in lista.Split(
+                                        ',',
+                                        StringSplitOptions.TrimEntries |
+                                        StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        <span class="badge bg-secondary me-1">
+                                            @rol
+                                        </span>
+                                    }
+                                }
+                            </td>
+
+                            <td class="text-end">
+
+                                @if (puedeGestionar)
+                                {
+                                    <a asp-action="Asignar"
+                                       asp-route-id="@usuario.Id"
+                                       class="btn btn-sm btn-primary">
+
+                                        <i class="bi bi-person-gear"></i>
+                                        Gestionar roles
+
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">
+                                        <i class="bi bi-lock-fill"></i>
+                                        Restringido
+                                    </span>
+                                }
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+</div>
